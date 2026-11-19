@@ -1,0 +1,354 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/*
+ * Base global. Só referencia tokens; nenhum valor literal de cor, fonte ou motion.
+ */
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-text-on-brand);
+  }
+
+  /* Foco forte e consistente (audit §7.3). Some só para clique de mouse. */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Âncoras não ficam escondidas sob o header fixo */
+  [id] {
+    scroll-margin-top: calc(var(--spacing) * 24);
+  }
+}
+
+@layer components {
+  /* Link "Pular para o conteúdo" — visível só no foco */
+  .skip-link {
+    position: fixed;
+    top: calc(var(--spacing) * 3);
+    left: calc(var(--spacing) * 3);
+    z-index: var(--z-overlay);
+    padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+    border-radius: var(--radius-md);
+    background-color: var(--color-brand);
+    color: var(--color-text-on-brand);
+    font-weight: 700;
+    transform: translateY(-200%);
+    transition: transform var(--dur-fast) var(--ease-standard);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Motion (decisions §5) — src/components/motion                     */
+  /* ---------------------------------------------------------------- */
+
+  /* Revelação de texto. Só esconde sob html[data-motion], que o script do
+     <head> liga quando não há reduced-motion (e desliga se o JS falhar). */
+  [data-reveal] {
+    transition:
+      opacity var(--dur-slow) var(--ease-out-expo),
+      translate var(--dur-slow) var(--ease-out-expo),
+      clip-path var(--dur-slower) var(--ease-out-expo);
+    transition-delay: calc(var(--reveal-i, 0) * var(--stagger));
+  }
+
+  html[data-motion] [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    translate: 0 var(--reveal-distance);
+  }
+
+  /* Máscara horizontal (o "R$ 80 mil" da prova social, Fase 3d) */
+  html[data-motion] [data-reveal="mask"]:not([data-revealed]) {
+    opacity: 1;
+    translate: none;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  /* Como funciona: etapa ativa em azul, demais em cinza */
+  .step-motto,
+  .step-title {
+    color: var(--color-text-muted);
+    transition: color var(--dur-base) var(--ease-standard);
+  }
+
+  .step[data-active] .step-motto {
+    color: var(--color-brand);
+  }
+
+  .step[data-active] .step-title {
+    color: var(--color-text);
+  }
+
+  /* Antes da coreografia carregar (ou sem JS), todas as etapas legíveis */
+  html:not([data-choreography]) .step-motto {
+    color: var(--color-text);
+  }
+
+  .steps-fill {
+    scale: 1 0;
+  }
+
+  html:not([data-choreography]) .steps-fill {
+    scale: 1 1;
+  }
+
+  /* Lema do hero: a palavra da etapa ativa acende */
+  .motto-word {
+    transition: color var(--dur-base) var(--ease-standard);
+  }
+
+  html[data-scene-step="think"] [data-motto-word="think"],
+  html[data-scene-step="develop"] [data-motto-word="develop"],
+  html[data-scene-step="deliver"] [data-motto-word="deliver"],
+  html[data-scene-step="repeat"] [data-motto-word="repeat"] {
+    color: var(--color-brand);
+  }
+
+  /* Destaque ao chegar por âncora (Problema → Cases), 1,2 s */
+  [data-highlighted] {
+    box-shadow: var(--shadow-glow);
+    transition: box-shadow var(--dur-base) var(--ease-standard);
+  }
+
+  /* Header (3d): transparente no topo, com fundo depois de 80 px (html[data-scrolled]) */
+  .site-header {
+    transition:
+      background-color var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard);
+    border-bottom: 1px solid transparent;
+  }
+
+  html[data-scrolled] .site-header,
+  .site-header[data-open] {
+    background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    border-bottom-color: var(--color-border);
+    backdrop-filter: blur(12px);
+  }
+
+  .site-header-panel {
+    background-color: var(--color-bg);
+  }
+
+  .menu-icon,
+  .menu-icon::before {
+    display: block;
+    width: 1.125rem;
+    height: 2px;
+    background-color: currentColor;
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  .menu-icon {
+    position: relative;
+    translate: 0 -3px;
+  }
+
+  .menu-icon::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+  }
+
+  .site-header[data-open] .menu-icon {
+    transform: translateY(3px) rotate(45deg);
+  }
+
+  .site-header[data-open] .menu-icon::before {
+    transform: translateY(-6px) rotate(-90deg);
+  }
+
+  /* FAQ: sinal de + que vira − */
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-brand);
+  }
+
+  .faq-icon::before,
+  .faq-icon::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 2px;
+    background-color: currentColor;
+    transition: transform var(--dur-base) var(--ease-standard);
+  }
+
+  .faq-icon::after {
+    transform: rotate(90deg);
+  }
+
+  .faq-item[open] .faq-icon::after {
+    transform: rotate(0deg);
+  }
+
+  /* CTA magnético: o GSAP move por transform; o hover de cor segue no CSS */
+  [data-magnetic] {
+    display: inline-block;
+  }
+
+  /* Lenis (rolagem suave) */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Fundo do hero (src/components/three/HeroBackdrop.tsx)             */
+  /* ---------------------------------------------------------------- */
+
+  .scene-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-canvas);
+    overflow: hidden;
+    pointer-events: none;
+    background-color: var(--color-bg);
+  }
+
+  /*
+   * Grid em CSS com a mesma perspectiva da câmera 3D: perspective = metade da
+   * altura / tan(fov/2) e inclinação = 90° − elevação (valores injetados pelo
+   * componente a partir de config.ts). 1 célula = --grid-cell no centro da tela,
+   * como no canvas, então o crossfade quase não aparece.
+   */
+  .scene-grid {
+    position: absolute;
+    inset: -100%;
+    background-image:
+      radial-gradient(circle, var(--color-grid-dot) 1.5px, transparent 2px),
+      linear-gradient(to right, var(--color-grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-grid-line) 1px, transparent 1px);
+    background-size: var(--grid-cell) var(--grid-cell);
+    background-position:
+      50% 50%,
+      calc(50% + var(--grid-cell) / 2) calc(50% + var(--grid-cell) / 2),
+      calc(50% + var(--grid-cell) / 2) calc(50% + var(--grid-cell) / 2);
+    transform: perspective(calc(50dvh / tan(var(--scene-half-fov, 17.5deg))))
+      rotateX(var(--scene-tilt, 38deg));
+    mask-image: radial-gradient(ellipse 30% 26% at 50% 52%, black 35%, transparent 100%);
+  }
+
+  /* Véu atrás da coluna de texto: as arestas dos blocos não cruzam o subtítulo */
+  .scene-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 62% 58% at 24% 46%,
+      color-mix(in srgb, var(--color-bg) 88%, transparent),
+      transparent 72%
+    );
+  }
+
+  @media (max-width: 40rem) {
+    .scene-backdrop::after {
+      background: radial-gradient(
+        ellipse 110% 46% at 50% 52%,
+        color-mix(in srgb, var(--color-bg) 82%, transparent),
+        transparent 78%
+      );
+    }
+  }
+
+  /* Na captura do fallback, só a cena */
+  html[data-scene-capture] .scene-backdrop::after {
+    content: none;
+  }
+
+  html[data-scene-capture] .site-header {
+    display: none;
+  }
+
+  .scene-fallback,
+  .scene-canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--dur-crossfade) var(--ease-standard);
+  }
+
+  /* A imagem é mais densa que a cena em movimento: entra mais apagada */
+  .scene-fallback img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+  }
+
+  .scene-fallback[data-visible],
+  .scene-backdrop[data-ready] .scene-canvas {
+    opacity: 1;
+  }
+
+  /* Reduced-motion: imagem estática mesmo sem JS (decisions §2.5) */
+  @media (prefers-reduced-motion: reduce) {
+    .scene-fallback {
+      opacity: 1;
+    }
+    .scene-canvas {
+      display: none;
+    }
+  }
+
+  /* Modo captura (?scene=capture): só a cena, para gerar o fallback */
+  html[data-scene-capture] main,
+  html[data-scene-capture] .skip-link {
+    visibility: hidden;
+  }
+  html[data-scene-capture] .scene-canvas {
+    transition: none;
+  }
+}

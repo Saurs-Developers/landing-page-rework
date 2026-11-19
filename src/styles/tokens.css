@@ -1,0 +1,132 @@
+/*
+ * src/styles/tokens.css — fonte única de verdade (docs/decisions.md §6).
+ *
+ * Nenhum valor de cor, fonte, espaço ou motion fica fora deste arquivo.
+ * - `@theme static` gera as utilities do Tailwind (bg-surface, text-brand,
+ *   text-display, py-section, ease-out-expo…) e SEMPRE emite as variáveis em
+ *   :root, mesmo sem uso em classes. O JS (GSAP, cena 3D) lê esses valores com
+ *   getComputedStyle via src/lib/tokens.ts.
+ * - A paleta padrão do Tailwind é removida (`--color-*: initial`), então só as
+ *   cores daqui existem como utility.
+ *
+ * Diferenças de nome em relação ao §6.3, para encaixar nos namespaces do Tailwind v4:
+ *   --space-section  → --spacing-section  (utility: py-section)
+ *   --space-gutter   → --spacing-gutter   (utility: px-gutter)
+ *   --container-max  → --container-page   (utility: max-w-page; "max" colidiria com max-w-max)
+ */
+
+@theme static {
+  /* Remove a paleta padrão do Tailwind */
+  --color-*: initial;
+
+  /* Cor: base */
+  --color-bg: #1a1a1a;
+  --color-bg-deep: #121212;
+  --color-surface: #232323;
+  --color-surface-raised: #2a2a2a;
+  --color-surface-glass: rgb(255 255 255 / 0.04);
+
+  /* Cor: texto */
+  --color-text: #fafafa;
+  --color-text-muted: #a3a3a3;
+  --color-text-on-brand: #0b1620;
+
+  /* Cor: marca */
+  --color-brand: #bae6fd;
+  --color-brand-hover: #7dd3fc;
+  --color-brand-soft: rgb(186 230 253 / 0.12);
+  --color-brand-line: rgb(186 230 253 / 0.45);
+
+  /* Cor: linhas e grid */
+  --color-border: rgb(255 255 255 / 0.12);
+  --color-border-strong: rgb(255 255 255 / 0.24);
+  --color-grid-line: rgb(255 255 255 / 0.06);
+  --color-grid-dot: rgb(255 255 255 / 0.18);
+
+  /* Cor: estados */
+  --color-success: #86efac;
+  --color-error: #fca5a5;
+  --color-focus: #bae6fd;
+
+  /* Tipografia: escala fluida 360px → 1440px */
+  --text-xs: clamp(0.75rem, 0.7292rem + 0.0926vw, 0.8125rem);
+  --text-sm: clamp(0.875rem, 0.8542rem + 0.0926vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.9583rem + 0.1852vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.0417rem + 0.3704vw, 1.375rem);
+  --text-xl: clamp(1.25rem, 1.0833rem + 0.7407vw, 1.75rem);
+  --text-2xl: clamp(1.5rem, 1.25rem + 1.1111vw, 2.25rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.6667vw, 3rem);
+  --text-4xl: clamp(2.25rem, 1.6667rem + 2.5926vw, 4rem);
+  --text-display: clamp(2.75rem, 1.6667rem + 4.8148vw, 6rem);
+  --text-mega: clamp(3.5rem, 1.6667rem + 8.1481vw, 9rem);
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.2;
+  --leading-body: 1.6;
+  --tracking-display: -0.02em;
+  --tracking-eyebrow: 0.12em;
+  --tracking-mega: 0.3em;
+
+  /* Espaço (base 4px) */
+  --spacing: 0.25rem;
+  --spacing-section: clamp(4rem, 2.3333rem + 7.4074vw, 9rem);
+  --spacing-gutter: clamp(1.25rem, 0.8333rem + 1.8519vw, 2.5rem);
+  --container-page: 76rem;
+  --grid-cell: 3.5rem;
+
+  /* Raios */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  /* Sombras e brilho */
+  --shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 20px 40px -20px rgb(0 0 0 / 0.6);
+  --shadow-raised: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 30px 60px -24px rgb(0 0 0 / 0.7);
+  --shadow-glow: 0 0 0 1px rgb(186 230 253 / 0.35), 0 8px 32px -8px rgb(186 230 253 / 0.25);
+  --shadow-focus: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-focus);
+
+  /* Motion */
+  --dur-instant: 100ms;
+  --dur-fast: 180ms;
+  --dur-base: 280ms;
+  --dur-slow: 480ms;
+  --dur-slower: 800ms;
+  --dur-scene: 1200ms;
+  --dur-crossfade: 600ms; /* fallback do hero → canvas (decisions §2.5) */
+  --dur-highlight: 1200ms; /* quanto o card fica destacado ao chegar por âncora (§5) */
+  --stagger: 60ms; /* entre linhas na revelação de texto */
+  --reveal-distance: 1.5rem; /* 24px de subida na revelação */
+  --magnetic-max: 6px; /* deslocamento máximo do CTA magnético */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Camadas */
+  --z-canvas: 0;
+  --z-content: 10;
+  --z-header: 50;
+  --z-overlay: 100;
+}
+
+/*
+ * Fontes: o next/font/local injeta --font-play e --font-quattrocento no <html>
+ * (src/app/fonts.ts). `inline` faz a utility usar a variável no ponto de uso.
+ */
+@theme inline {
+  --font-display: var(--font-play), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-quattrocento), ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 150ms;
+    --dur-slow: 150ms;
+    --dur-slower: 150ms;
+    --dur-scene: 0ms;
+    --stagger: 0ms;
+    --reveal-distance: 0px;
+  }
+}
